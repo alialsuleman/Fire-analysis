@@ -35,9 +35,10 @@ export interface MergeDisaster extends PureDisaster { // // to graphdatebase api
 }
 
 
-
 export interface Disaster extends PureDisaster { /// to store in mongodb database 
     _id: string,
+    latitudeIndex: number,
+    longitudeIndex: number,
     numOfPost: number,
     numOFlatitude: number,
     numOFlongitude: number,

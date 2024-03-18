@@ -26,7 +26,6 @@ if (cluster.isMaster) {
     console.log(`worker ${worker.process.pid} died`)
     cluster.fork() //forks a new process if any process dies
   })
-
   startAnalyser();
 }
 else {

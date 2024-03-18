@@ -21,6 +21,8 @@ const disasterSchema = new Schema({
     numOfPost: Number,
     numOFlatitude: Number,
     numOFlongitude: Number,
+    latitudeIndex: Number,
+    longitudeIndex: Number,
     confidence_array: {
         fisrt: Number,
         second: Number,
@@ -29,6 +31,6 @@ const disasterSchema = new Schema({
     }
 })
 
-disasterSchema.index({ 'position.latitude': 1, 'position.longitude': 1 });
+disasterSchema.index({ 'latitudeIndex': 1, 'longitudeIndex': 1 });
 export const DisasterModel = model('Disaster', disasterSchema);
 

@@ -11,6 +11,6 @@ export interface DisasterDao {
     updateOrCreate(disaster: Disaster): Promise<void>;
     getWithRange(x1: number, y1: number, x2: number, y2: number): Promise<Disaster[]>;
     deleteOldDisasterCreateNew(disaster: Disaster): Promise<void>;
-
+    getSliceByindex(x: number, y: number): Promise<Disaster[]>
 
 }

@@ -26,6 +26,6 @@ ANALYSER_DELAY.push(process.env.ANALYSER_DELAY ? +process.env.ANALYSER_DELAY : 1
 
 export let MIN_REQUIRE_COMMEN_AREA = process.env.MIN_REQUIRE_COMMEN_AREA ? +process.env.MIN_REQUIRE_COMMEN_AREA : 30;
 export let DEGREE = 110000;
-
+export let DEGREE_IN_KM = DEGREE / 1000;
 
 export let FIRE_ACTIVATION_RATE = process.env.MIN_REQUIRE_COMMEN_AREA ? +process.env.MIN_REQUIRE_COMMEN_AREA : 50;

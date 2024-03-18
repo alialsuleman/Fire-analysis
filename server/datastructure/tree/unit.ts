@@ -126,7 +126,7 @@ export class Unit {
                 index.push(cnt);
                 id.push(dis._id);
             }
-        
+
 
             cnt++;
         }
@@ -243,6 +243,8 @@ export class Unit {
                 numOfPost: numberOfPost,
                 numOFlatitude: sumLatitude,
                 numOFlongitude: sumLongitude,
+                longitudeIndex: 123,
+                latitudeIndex: 123,
                 confidence_array: {
                     fisrt: xxx[1],
                     second: xxx[2],
@@ -352,7 +354,7 @@ export class Unit {
             await db.updateOrCreate(mongodbDisaster);
             endTime = Date.now();
             sumTime += endTime - startTime;
-           // console.log('time of update dsiaster  :' + (endTime - startTime) + 'millesecnod');
+            // console.log('time of update dsiaster  :' + (endTime - startTime) + 'millesecnod');
 
 
             /***********************************************************/
@@ -391,6 +393,8 @@ export class Unit {
                 numOfPost: 1,
                 numOFlatitude: event.position.latitude,
                 numOFlongitude: event.position.longitude,
+                longitudeIndex: 123,
+                latitudeIndex: 123,
                 confidence_array: {
                     fisrt: 0,
                     second: 0,

@@ -13,6 +13,7 @@ import { MongodbPost, Post } from '../../shared/post';
 
 export class SqlDataStore implements DataStore {
 
+
     async openDb() {
         mongoose.Promise = global.Promise;
         // @ts-ignore
@@ -83,7 +84,10 @@ export class SqlDataStore implements DataStore {
 
     }
 
-
+    async getSliceByindex(x: number, y: number): Promise<Disaster[]> {
+        //  console.log(x + ' ' + y);
+        return await DisasterModel.find({ latitudeIndex: x, longitudeIndex: y });
+    }
 
 
     async deleteDisaster(id: string): Promise<void> {
