@@ -4,7 +4,7 @@ export interface Post {
     _id: string
     position: Position
     radius: number
-    createdAt: Date
+    createdAt: number
     severity: number
     confidence: number
 }

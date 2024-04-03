@@ -13,8 +13,8 @@ export interface PureDisaster {
         country: string
     },
     radius: number,
-    startAt: Date,
-    endAt: Date,
+    startAt: number,
+    endAt: number,
     severity: number, ///من اليوزر
     confidence: number, //// من تحليل البوست 
 }

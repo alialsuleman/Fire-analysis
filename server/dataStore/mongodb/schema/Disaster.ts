@@ -14,8 +14,8 @@ const disasterSchema = new Schema({
         country: String
     },
     radius: Number,
-    startAt: Date,
-    endAt: Date,
+    startAt: Number,
+    endAt: Number,
     severity: Number,
     confidence: Number,
     numOfPost: Number,

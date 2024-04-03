@@ -5,7 +5,7 @@ import { ProtoGrpcType } from './proto/event'
 import { EventHandlers } from './proto/ndmsRpcEvent/Event';
 import { Post, Post__Output } from './proto/ndmsRpcEvent/Post';
 import { Timestamp } from './proto/google/protobuf/Timestamp';
-import { disasterQueue, postQueue } from './Queues';
+import { disasterQueue, sharedPostsQueue, } from './Queues';
 import { Disaster } from './proto/ndmsRpcEvent/Disaster';
 
 const PORT = 8082
@@ -28,20 +28,16 @@ export function startGrpcServer() {
         })
 }
 
-let cnt = 10000;
-const createdAtTimestamp: Timestamp = {
-    seconds: 123123,
-    nanos: 1231231
-};
+
 function getServer() {
     const server = new grpc.Server()
     server.addService(randomPackage.Event.service, {
         sendEvent: (call) => {
 
             call.on("data", (req: Post) => {
-                // const msg = req;
-                // console.log(JSON.stringify(req))
-                postQueue.add(req);
+                console.log(req.id);
+                sharedPostsQueue.add(req);
+                console.log("QUEUE" + sharedPostsQueue.getSize())
             })
 
             start(call);
@@ -54,18 +50,43 @@ function getServer() {
 
     return server
 }
+
 let DELAY = 1;
+
 function start(call: grpc.ServerDuplexStream<Post__Output, Disaster>) {
+
     if (disasterQueue.getSize()) {
+        DELAY = 1;
         const disaster = disasterQueue.front();
-        call.write(disaster);
-        setTimeout(function () {
-            start(call);
-        }, DELAY);
+        console.log(`send Disaster id : ${disaster?.id} using GRPC server`);
+        if (disaster) call.write(disaster);
     }
-    else call.end();
+    else DELAY = 1000;
+    setTimeout(function () {
+        start(call);
+    }, DELAY);
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

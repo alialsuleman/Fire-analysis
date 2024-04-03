@@ -1,6 +1,6 @@
 import { calculateCommonArea, distanceBetweenTwoPoint, queue } from ".";
 import { db } from "../dataStore";
-import { FIRE_ACTIVATION_RATE, MIN_REQUIRE_COMMEN_AREA } from "../env";
+import { ADD_TIME_TO_DISASTER_END, FIRE_ACTIVATION_RATE, MIN_REQUIRE_COMMEN_AREA } from "../env";
 import { CreateDisaster, Disaster, Post, PureDisaster } from "../shared";
 import { Disaster as GrpcDisaster } from "../proto/ndmsRpcEvent/Disaster";
 import { disasterQueue } from "../Queues";
@@ -78,44 +78,59 @@ export class Slice {
 
         if (sharedDisaster.length) {
 
+
+            let xxx: number[] = [];
+            xxx[1] = xxx[2] = xxx[3] = xxx[4] = 0;
+
+            let newId: string = "ASDASD";
+            let numberOfPost = 1;
+            let sumSeverity = event.severity;
+            let sumLongitude = event.position.longitude;
+            let sumLatitude = event.position.latitude;
+            let mxRelation = 0;
+
+            let mnDisasterTime = event.createdAt;
+            let mxDisasterTime = event.createdAt;
+
+
+
+
+            sharedDisaster.map(x => mnDisasterTime = Math.min(mnDisasterTime, x.startAt));
+            sharedDisaster.map(x => mxDisasterTime = Math.max(mxDisasterTime, x.endAt));
+            mxDisasterTime = Math.max(ADD_TIME_TO_DISASTER_END * event.severity + event.createdAt, mxDisasterTime);
+
+
             //  console.log('match found !');
             /***********************************************************/
             //  1- create new disaster by merge all this disaster then mege the resault with post info  
             // it need to handle time and anthor stuff 
 
-            let xxx: number[] = [];
-            xxx[1] = xxx[2] = xxx[3] = xxx[4] = 0;
+            sharedDisaster.map(x => { if (x.numOfPost >= mxRelation) { newId = x._id; mxRelation = x.numOfPost; } });
+            const mongodbPost = { ...event, disaster_id: newId };
+
+
+
+            sharedDisaster.map(x => sumLongitude += x.numOFlongitude);
+            sharedDisaster.map(x => sumLatitude += x.numOFlatitude);
+
+            sharedDisaster.map(x => numberOfPost += x.numOfPost)
+
+
+
 
             if (event.confidence == 1) xxx[1] = 1;
             else if (event.confidence == 2) xxx[2] += 1;
             else if (event.confidence == 3) xxx[3] += 1;
             else if (event.confidence == 4) xxx[4] += 1;
+            sharedDisaster.map(x => xxx[1] += x.confidence_array.fisrt)
+            sharedDisaster.map(x => xxx[2] += x.confidence_array.second)
+            sharedDisaster.map(x => xxx[3] += x.confidence_array.third)
+            sharedDisaster.map(x => xxx[4] += x.confidence_array.fourth)
 
 
-
-            let numberOfPost = 1;
-            let sumSeverity = event.severity;
-            let sumLongitude = event.position.longitude, sumLatitude = event.position.latitude;
-
-            let newId: string = "ASDASD";
-            let mxRelation = 0;
-            // console.log('shared disaster :  ');
-            for (let dis of sharedDisaster) {
-                //console.log(dis._id);
-                // small to large  
-                if (dis.numOfPost >= mxRelation) {
-                    newId = dis._id;
-                    mxRelation = dis.numOfPost;
-                }
-
-                sumLongitude += dis.numOFlongitude;
-                sumLatitude += dis.numOFlatitude;
-                numberOfPost += dis.numOfPost;
+            sharedDisaster.map(x => sumSeverity += x.severity * x.numOfPost)
 
 
-            }
-            // console.log('new ID : ' + newId);
-            //console.log(numberOfPost);
 
 
             /***********************************************************/
@@ -124,6 +139,7 @@ export class Slice {
             x = sumLatitude / numberOfPost;
             y = sumLongitude / numberOfPost;
             radius = 0;
+
             let distance = distanceBetweenTwoPoint(
                 { x, y, radius },
                 { x: +event.position.latitude, y: +event.position.longitude, radius: event.radius }
@@ -132,7 +148,6 @@ export class Slice {
             radius = Math.max(distance, radius)
 
             for (let dis of sharedDisaster) {
-
                 distance = distanceBetweenTwoPoint(
                     { x, y, radius },
                     { x: +dis.position.latitude, y: +dis.position.longitude, radius: dis.radius }
@@ -140,32 +155,25 @@ export class Slice {
                 distance = distance + dis.radius;
                 radius = Math.max(distance, radius);
             }
+            event.position.latitude = x;
+            event.position.longitude = y;
+            event.radius = radius;
 
             /***********************************************************/
 
+            let mxConfidence = Math.max(...xxx);
+            if (xxx[1] == mxConfidence) event.confidence = 1;
+            else if (xxx[2] == mxConfidence) event.confidence = 2;
+            else if (xxx[3] == mxConfidence) event.confidence = 3;
+            else if (xxx[4] == mxConfidence) event.confidence = 4;
 
-            for (let dis of sharedDisaster) {
-                //  build confidence array 
-                xxx[1] += dis.confidence_array.fisrt;
-                xxx[2] += dis.confidence_array.second;
-                xxx[3] += dis.confidence_array.third;
-                xxx[4] += dis.confidence_array.fourth;
-
-                // give the sum of all severity
-                sumSeverity += dis.severity * dis.numOfPost;
-            }
-
-
-
-            event.position.latitude = x;
-            event.position.longitude = y;
-
+            /****** */
             const pureDisaster: PureDisaster = {
-                isActive: true,
+                isActive: false,
                 position: event.position,
-                radius: radius,
-                startAt: event.createdAt,
-                endAt: event.createdAt,
+                radius: event.radius,
+                startAt: mnDisasterTime,
+                endAt: mxDisasterTime,
                 severity: sumSeverity / numberOfPost,
                 confidence: event.confidence,
             }
@@ -176,9 +184,8 @@ export class Slice {
             //   Active or disActive the disaster 
             pureDisaster.isActive = (pureDisaster.severity >= FIRE_ACTIVATION_RATE);
 
-
             /***********************************************************/
-            //  -!
+            //  -! mongodbDisaster
             const mongodbDisaster: Disaster = {
                 ...pureDisaster,
                 _id: newId,
@@ -196,33 +203,11 @@ export class Slice {
             };
 
 
-            /***********************************************************/
-            //   calculate the confidence
 
 
-
-            let mx = Math.max(mongodbDisaster.confidence_array.fisrt,
-                mongodbDisaster.confidence_array.second,
-                mongodbDisaster.confidence_array.third,
-                mongodbDisaster.confidence_array.fourth);
-
-            if (mongodbDisaster.confidence_array.fisrt == mx) mongodbDisaster.confidence = 1;
-            else if (mongodbDisaster.confidence_array.second == mx) mongodbDisaster.confidence = 2;
-            else if (mongodbDisaster.confidence_array.third == mx) mongodbDisaster.confidence = 3;
-            else if (mongodbDisaster.confidence_array.fourth == mx) mongodbDisaster.confidence = 4;
 
             /***********************************************************/
-            //   edit the confidence in PureDisaster
-            pureDisaster.confidence = mongodbDisaster.confidence;
-
-            /***********************************************************/
-            // send  this new disaster, and all the disasters id's that i merge it to delete it from database and create new disaster and get the new disasterID   
-            // it need to handle  get by api
-            // mergeDisaster
-
-            // const mergeDisaster: MergeDisaster = {
-            //     ...pureDisaster, Disasters_id: id, postIds: [event._id]
-            // }
+            // GRPC
 
 
             const { startAt, endAt, ...newPure } = { ...pureDisaster };
@@ -235,48 +220,33 @@ export class Slice {
                 postIds: [event._id],
                 ...newPure,
                 startAt: {
-                    seconds: startAt.getTime() / 1000,
-                    nanos: startAt.getTime() % 1000
+                    seconds: startAt / 1000,
+                    nanos: startAt % 1000
                 },
                 endAt: {
-                    seconds: endAt.getTime() / 1000,
-                    nanos: endAt.getTime() % 1000
+                    seconds: endAt / 1000,
+                    nanos: endAt % 1000
                 }
             }
 
 
 
-            /***********************************************************/
-            // delete the disasters that i merge it from mongodb database 
-            //edit the disaster_id from posts schema -that related to all last disastater that i remove  - to new disaster id 
 
 
 
             // delete old disaster and update old post with new diasaster
             const deletePromises = [];
             const updatePromises = [];
-
             for (let dis of sharedDisaster) {
                 if (dis._id === newId) continue;
                 grpcDisaster.disastersIds.push(dis._id);
                 deletePromises.push(db.deleteDisaster(dis._id));
                 updatePromises.push(db.updatePostsDisaster(dis._id, newId));
             }
-
-
-
-            // add didadter to queue to send it to grapg database 
-            disasterQueue.add(grpcDisaster);
-
-
-            // Execute delete and update operations concurrently
-            startTime = Date.now();
             await Promise.all(deletePromises);
             await Promise.all(updatePromises);
-            endTime = Date.now();
 
-            sumTime += endTime - startTime;
-
+            disasterQueue.add(grpcDisaster);
 
 
 
@@ -285,48 +255,43 @@ export class Slice {
             //delete the disasters that i merge it from unit disaster array
             // Remove elements from the disaster array based on indices stored in the index array
             index.sort((a, b) => b - a);
-
             index.forEach(idx => {
                 if (idx >= 0 && idx < this.disaster.length) {
                     this.disaster.splice(idx, 1);
                 }
             });
 
+            /***********************************************************/
+            // add new disaster and new post to disaster mongodb schema this object 
             this.disaster.push(mongodbDisaster);
-
-            /***********************************************************/
-            // add new disaster to disaster mongodb schema
-            startTime = Date.now();
             await db.updateOrCreate(mongodbDisaster);
-            endTime = Date.now();
-            sumTime += endTime - startTime;
-            /***********************************************************/
-            // add the new post to mongodb database and set the refrence disaster id  as new disaster id 
-            startTime = Date.now();
-            const mongodbPost = { ...event, disaster_id: newId };
-            db.addPost(mongodbPost);
-            endTime = Date.now();
-            sumTime += endTime - startTime;
+            await db.addPost(mongodbPost);
+
         }
         else {
 
             /***********************************************************/
             //create new disaster node 
+
+            let mnDisasterTime = event.createdAt;
+            let mxDisasterTime = event.createdAt + ADD_TIME_TO_DISASTER_END * event.severity;
+
+
             const puredisaster: PureDisaster = {
                 isActive: false,
                 position: event.position,
                 radius: radius,
-                startAt: event.createdAt,
-                endAt: event.createdAt,
+                startAt: mnDisasterTime,
+                endAt: mxDisasterTime,
                 severity: event.severity,
                 confidence: event.confidence,
             };
 
-
+            let newId: string = `${idCounter++}`;
 
             const mongodbDisaster: Disaster = {
                 ...puredisaster,
-                _id: "null",
+                _id: newId,
                 numOfPost: 1,
                 numOFlatitude: event.position.latitude,
                 numOFlongitude: event.position.longitude,
@@ -350,11 +315,6 @@ export class Slice {
 
 
 
-            const createDisaster: CreateDisaster = {
-                ...puredisaster,
-                postIds: [event._id]
-            }
-
             /***********************************************************/
             /***********************************************************/
             //add new disaster to unit disaster array
@@ -365,9 +325,7 @@ export class Slice {
 
 
 
-            let newId: string = `${idCounter++}`;
-            mongodbDisaster._id = newId;
-            await this.addDisaster(mongodbDisaster);
+            this.disaster.push(mongodbDisaster);
             await db.updateOrCreate(mongodbDisaster);
 
             const mongodbPost = { ...event, disaster_id: newId };
@@ -381,35 +339,23 @@ export class Slice {
 
 
             const grpcDisaster: GrpcDisaster = {
-                type: 1,
+                type: 0,
                 id: newId,
                 disastersIds: [],
                 postIds: [event._id],
                 ...newPure,
                 startAt: {
-                    seconds: startAt.getTime() / 1000,
-                    nanos: startAt.getTime() % 1000
+                    seconds: startAt / 1000,
+                    nanos: startAt % 1000
                 },
                 endAt: {
-                    seconds: endAt.getTime() / 1000,
-                    nanos: endAt.getTime() % 1000
+                    seconds: endAt / 1000,
+                    nanos: endAt % 1000
                 }
             }
             disasterQueue.add(grpcDisaster);
-
-
-            startTime = Date.now();
-
-
-
-            endTime = Date.now();
-            sumTime += endTime - startTime;
-            startTime = Date.now();
-            endTime = Date.now();
-            sumTime += endTime - startTime;
-
-
-
+            //  console.log(JSON.stringify(mongodbDisaster));
+            // console.log(JSON.stringify(grpcDisaster));
 
         }
         return sumTime;
@@ -422,8 +368,15 @@ export class Slice {
 
     async editDisaster(post: Post) {
         let databasePost = await db.getPost(post._id);
+
         for (let i = 0; i < this.disaster.length; i++) {
+
             if (this.disaster[i]._id == databasePost?.disaster_id) {
+
+                let mxDisasterTime = Math.max(post.createdAt + ADD_TIME_TO_DISASTER_END * post.severity, this.disaster[i].endAt);
+
+                this.disaster[i].endAt = mxDisasterTime;
+
                 let sumSeverity = this.disaster[i].severity * this.disaster[i].numOfPost;
 
 
@@ -434,7 +387,7 @@ export class Slice {
                 databasePost.severity = post.severity;
 
 
-                await db.updatePostseverity(databasePost);
+                await db.updatePost(databasePost);
                 await db.updateOrCreate(this.disaster[i]);
                 break;
             }

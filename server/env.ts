@@ -31,3 +31,4 @@ export let DEGREE_IN_KM = DEGREE / 1000;
 export let FIRE_ACTIVATION_RATE = process.env.MIN_REQUIRE_COMMEN_AREA ? +process.env.MIN_REQUIRE_COMMEN_AREA : 50;
 
 
+export let ADD_TIME_TO_DISASTER_END = 10;

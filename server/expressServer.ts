@@ -6,7 +6,6 @@ import { ERROR } from './utils/httpstatusText';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { ANALYSER_DELAY, PORT } from './env';
-import { postQueue } from './Queues/PostQueue';
 import { Post } from './shared/post';
 
 
@@ -60,7 +59,6 @@ export function startServer() {
 
     app.get('/postQueue', (req, res) => {
         //  postQueue.add({ type: "UpdatePost", id: "123", confidence: 123123 })
-        res.send(postQueue.display());
 
     })
 

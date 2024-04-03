@@ -7,7 +7,6 @@ import { DisasterModel, PostModel } from './schema';
 import mongoose, { Connection } from 'mongoose';
 import { MONGO_URL, MONGO_PAS, MONGO_USR } from './config'
 import { MongodbPost, Post } from '../../shared/post';
-import { NewPostQueue } from '../../Queues';
 
 
 
@@ -111,7 +110,7 @@ export class SqlDataStore implements DataStore {
         await newPost.save();
     }
 
-    async updatePostseverity(post: MongodbPost): Promise<void> {
+    async updatePost(post: MongodbPost): Promise<void> {
         const filter = { _id: post._id };
         const update = {
             $set: {
