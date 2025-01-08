@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package ndmsRpcEvent;
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "ndms.rpc.event";
+
+service Event {
+  rpc sendEvent(stream Post) returns (stream Disaster ) ;
+}
+
+message Status  {
+  string message = 1;
+  int32 code = 2;
+}
+message Post {
+  int32 type = 1;
+  string id =2 ;
+  Position position =3 ;
+  double radius =4 ;
+  google.protobuf.Timestamp createdAt=5 ;
+  int32 severity =6 ;
+  int32 confidence = 7 ;
+  int32 numLikes  = 8 ;
+  int32 numDisLikes = 9 ;
+  int32 numComments = 10 ;      
+}
+
+message Disaster {
+  int32 type = 1;
+  repeated string postIds = 2;
+  repeated string disastersIds = 3  ;
+  string id =4; // the main disaster
+  bool isActive = 5;
+  Position position =6 ;
+  double radius =7 ;
+  google.protobuf.Timestamp startAt = 8;
+  google.protobuf.Timestamp endAt = 9;
+  int32 severity =10 ;
+  int32 confidence = 11 ;
+}
+
+message Position {
+  double latitude =1 ;
+  double longitude=2 ;
+  string address =3 ;
+  string state =4 ;
+  string city =5 ;
+  string country=6 ;
+}
+
