@@ -49,7 +49,7 @@ for (let i = 0; i <= 10; i++) {
 
 
 let like = 0, comment = 0, dislike = 0;
-function createRandomDate(n: number) {
+function createRandomData(n: number) {
     console.log("create random data");
 
     // حدود تقريبية لسوريا
