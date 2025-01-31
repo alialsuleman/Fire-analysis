@@ -1,2 +1,2 @@
-export * from './Disaster'
+export * from './Disaster/DisasterMetaData'
 export * from './Post'

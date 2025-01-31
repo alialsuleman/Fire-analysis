@@ -1,18 +1,86 @@
-import { getSlicingIndex } from "../../analyser";
-import { StaticSlice } from "../../datastructure";
+
 import { IdPool } from "../../datastructure/Queues/IdPool";
 import { SegmentTree } from "../../datastructure/segmentTree/segmentTree";
-import { Disaster, MongodbPost } from "../../shared";
-import { DisasterDao, PostDao } from "../dao";
-import { DataStore } from "../dataStore";
 import { DisasterDb } from "../mongodb/db/disasterDb";
+import { DisasterMetaDataDoc } from "../mongodb/schema";
 
 
 interface Slice_index {
     x: number, y: number
 }
 
-export class DisasterCache implements DisasterDao {
+export class DisasterCache extends DisasterDb {
+
+
+
+    slice: DisasterMetaDataDoc[][] = [[]];
+
+    idPool: IdPool;
+    map_sliceIndex_to_segIndex: any = {}; // here we trans lat , long to id_number 
+    segmentTree: SegmentTree;
+
+
+    constructor() {
+        super();
+        this.initWorldSlicingArray();
+        this.idPool = new IdPool(40001);
+        this.segmentTree = new SegmentTree(400001);
+    }
+
+    initWorldSlicingArray() {
+        console.log("init world array");
+        for (let i = 0; i <= 40000; i++) {
+            this.slice[i] = [];
+        }
+    }
+
+
+    async addDisasterMetaData(disasterMetaData: DisasterMetaDataDoc): Promise<void> {
+        super.addDisasterMetaData(disasterMetaData);
+        // let lat_index = disasterMetaData.latitudeIndex;
+        // let lon_index = disasterMetaData.longitudeIndex;
+
+        // let index = JSON.stringify({ lat_index, lon_index });
+        // if (typeof this.map_sliceIndex_to_segIndex[index] == 'number') {
+        //     let slice_index = this.map_sliceIndex_to_segIndex[index];
+        //     this.slice[slice_index].push(disasterMetaData);
+        // }
+    }
+
+    async getSlice(latitude: number, longitude: number): Promise<DisasterMetaDataDoc[]> {
+        return await super.getSlice(latitude, longitude);
+    }
+
+
+
+    __remove_item(index: number): void {
+    }
+    __remove_expired_ttls(): void {
+    }
+    __evict(): void {
+    }
+
+}
+
+/*
+
+latitudeIndex
+9910
+longitudeIndex
+19920
+numOFlatitude
+0.00311
+numOFlongitude
+24
+numOfPost
+24
+
+
+
+
+
+
+
 
 
     disasterDB: DisasterDb = new DisasterDb();
@@ -157,19 +225,13 @@ export class DisasterCache implements DisasterDao {
 
 
 
-}
 
-/*
 
-latitudeIndex
-9910
-longitudeIndex
-19920
-numOFlatitude
-0.00311
-numOFlongitude
-24
-numOfPost
-24
+
+
+
+
+
+
 
 */

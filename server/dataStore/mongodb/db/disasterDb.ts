@@ -1,7 +1,7 @@
-import { StaticSlice } from "../../../datastructure";
 import { Disaster } from "../../../shared";
-import { DisasterDao } from "../../dao";
-import { DisasterModel } from "../schema";
+import { DisasterDao } from "../../dao/disasterDao";
+import { DisasterMetaDataDoc } from "../schema";
+import { DisasterInfoDoc, DisasterInfoModel, DisasterMetaDataModel } from "../schema/Disaster";
 
 
 
@@ -9,6 +9,61 @@ import { DisasterModel } from "../schema";
 
 export class DisasterDb implements DisasterDao {
 
+
+
+    /*                      !--[READ  SECTION]--!                              */
+    async getDisasterInfo(_id: string): Promise<DisasterInfoDoc | null> {
+        return await DisasterInfoModel.findById(_id);
+    }
+    async getSlice(latitude: number, longitude: number): Promise<DisasterMetaDataDoc[]> {
+        let arr1: DisasterMetaDataDoc[] = await DisasterMetaDataModel.find({ longitudeIndex: longitude, latitudeIndex: latitude });
+        return arr1;
+    }
+
+
+
+
+
+
+    /*                      !--[CREATE SECTION]--!                              */
+    async addDisasterInfo(disasterInfo: DisasterInfoDoc): Promise<string> {
+        await disasterInfo.save();
+        let id = disasterInfo._id as string;
+        return id;
+    }
+    async addDisasterMetaData(disasterMetaData: DisasterMetaDataDoc): Promise<void> {
+        const dis = new DisasterMetaDataModel(disasterMetaData);
+        await dis.save();
+    }
+
+
+
+
+
+
+
+    /*                      !--[UPDATE SECTION]--!                              */
+    async updateDisasterInfo(newDisasterInfo: Partial<DisasterInfoDoc>): Promise<void> {
+        await DisasterInfoModel.findByIdAndUpdate(newDisasterInfo._id, newDisasterInfo, { new: true });
+    }
+    async updateDisasterMetaData(newDisasterMeta: DisasterMetaDataDoc): Promise<void> {
+        await DisasterMetaDataModel.findByIdAndUpdate(newDisasterMeta._id, newDisasterMeta, { new: true });
+    }
+
+
+    /*                      !--[DELETE SECTION]--!                              */
+
+    async deleteDisasterInfoById(id: string): Promise<void> {
+        await DisasterInfoModel.findByIdAndDelete(id);
+    }
+    async deleteDisasterMetaDataById(id: string): Promise<void> {
+        await DisasterMetaDataModel.findByIdAndDelete(id);
+    }
+
+
+}
+
+/*
 
     async getById(id: string): Promise<Disaster | null | undefined> {
         return await DisasterModel.findOne({ _id: id });
@@ -38,20 +93,21 @@ export class DisasterDb implements DisasterDao {
     async getSliceByindex(x: number, y: number): Promise<Disaster[]> {
         //  console.log(x + ' ' + y);
         let arr1: Disaster[] = await DisasterModel.find({ longitudeIndex: x, latitudeIndex: y });
-        let arr2: Disaster[] = await DisasterModel.find({ longitudeIndex: x + 1, latitudeIndex: y });
-        let arr3: Disaster[] = await DisasterModel.find({ longitudeIndex: x, latitudeIndex: y + 1 });
-        let arr4: Disaster[] = await DisasterModel.find({ longitudeIndex: x + 1, latitudeIndex: y + 1 });
-        let arr5: Disaster[] = await DisasterModel.find({ longitudeIndex: x - 1, latitudeIndex: y });
-        let arr6: Disaster[] = await DisasterModel.find({ longitudeIndex: x, latitudeIndex: y - 1 });
-        let arr7: Disaster[] = await DisasterModel.find({ longitudeIndex: x - 1, latitudeIndex: y - 1 });
-        let farr: Disaster[] = [...arr1, ...arr2, ...arr3, ...arr4, ...arr5, ...arr6, ...arr7];
-        return farr;
+        // let arr2: Disaster[] = await DisasterModel.find({ longitudeIndex: x + 1, latitudeIndex: y });
+        // let arr3: Disaster[] = await DisasterModel.find({ longitudeIndex: x, latitudeIndex: y + 1 });
+        // let arr4: Disaster[] = await DisasterModel.find({ longitudeIndex: x + 1, latitudeIndex: y + 1 });
+        // let arr5: Disaster[] = await DisasterModel.find({ longitudeIndex: x - 1, latitudeIndex: y });
+        // let arr6: Disaster[] = await DisasterModel.find({ longitudeIndex: x, latitudeIndex: y - 1 });
+        // let arr7: Disaster[] = await DisasterModel.find({ longitudeIndex: x - 1, latitudeIndex: y - 1 });
+        // let farr: Disaster[] = [...arr1, ...arr2, ...arr3, ...arr4, ...arr5, ...arr6, ...arr7];
+        return arr1;
     }
 
 
     async deleteDisaster(id: string): Promise<void> {
         await DisasterModel.deleteOne({ _id: id });
     }
+
     async getAllDisaster(): Promise<Disaster[]> {
         return await DisasterModel.find();
     }
@@ -123,4 +179,4 @@ export class DisasterDb implements DisasterDao {
 
     }
 
-}
+*/

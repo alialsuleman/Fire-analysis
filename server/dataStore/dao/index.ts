@@ -1,2 +1,2 @@
-export * from './disasterDao/disaster'
-export * from './postDao/post'
+export * from './disasterDao'
+export * from './postDao'

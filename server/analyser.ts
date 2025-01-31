@@ -1,25 +1,23 @@
-//import { postQueue } from "./Queues";
 import { db, initDb } from "./dataStore";
-//import { Location } from './datastructure';
+
 import { ANALYSER_DELAY, DEGREE_IN_KM, latitudeShift, longitudeShift, MX_DISASTER_ID } from "./env";
-import { assiVAlue, StaticSlice } from "./datastructure/slicing/staticSlicing/StaticSlice";
 import { Post } from "./shared";
 import { disasterQueue, sharedPostsQueue } from "./datastructure/Queues";
-import { Slice } from "./datastructure/slicing/slice";
-// ///  nx run-many --target=serve --all
-
-// //sudo systemctl status mongod
-
+import { DisasterMetaDataDoc } from "./dataStore/mongodb/schema";
+import { DisasterController } from "./controllers/disasterController";
+import { DisasterInfoDoc, DisasterInfoModel, DisasterMetaDataModel } from "./dataStore/mongodb/schema/Disaster";
 
 
 
 
-export function getSlicingIndex(x: number, y: number) {
-    let latitudeIndex = Math.floor((y * DEGREE_IN_KM + latitudeShift) / 100);
-    let longitudeIndex = Math.floor((x * DEGREE_IN_KM / 100 + longitudeShift) / 100);
+
+// slice with size 1 km ^2
+export function getSlicingIndex(latitude: number, longitude: number) {
+    let latitudeIndex = Math.floor((latitude * DEGREE_IN_KM + latitudeShift));
+    let longitudeIndex = Math.floor((longitude * DEGREE_IN_KM + longitudeShift));
     return {
-        x: longitudeIndex,
-        y: latitudeIndex
+        longitude: longitudeIndex,
+        latitude: latitudeIndex
     }
 }
 
@@ -41,18 +39,11 @@ let DELAY = 5000;
 
 
 
-async function start() {
+async function start(disasterController: DisasterController) {
+
+    ///// some db 
 
     let databaseTime = 0;
-    // await db.postDB.updatePostsDisaster("10000019", "0000");
-    //console.log("ok");
-    //  console.log("sharedPostsQueue + " + sharedPostsQueue.getSize())
-
-    // CON 5.44
-    // lat 35.04501173064739
-    // LON 38.553216064778304
-    // finish
-
 
     if (sharedPostsQueue.getSize()) {
         DELAY = 300;
@@ -61,45 +52,45 @@ async function start() {
 
 
 
+            let index = getSlicingIndex(post.position.latitude, post.position.longitude);
 
-            const ppostt: Post = {
-                _id: post.id,
-                position: post.position,
+
+
+            let metaData = new DisasterMetaDataModel({
+                _id: "any",
+                isActive: false,
+                latitude: post.position.latitude,
+                longitude: post.position.longitude,
+                latitudeIndex: index.latitude,
+                longitudeIndex: index.longitude,
                 radius: post.radius,
-                createdAt: +post.createdAt.seconds * 1000,
+                numOfPost: 1,
+            });
+
+            let disasterInfo: DisasterInfoDoc = new DisasterInfoModel({
+
+                position: post.position,
+
+                startAt: Date.now(),
+                endAt: Date.now() + 1000 * 60 * 60,
                 severity: post.severity,
                 confidence: post.confidence,
+
+                numOFlatitude: post.position.latitude,
+                numOFlongitude: post.position.longitude,
+                severity_array: [post.severity],
                 numLikes: post.numLikes,
                 numDisLikes: post.numDisLikes,
-                numComments: post.numComments ,
-            }
-            if (post.numLikes ) ppostt.numLikes =  post.numLikes ; 
-            else  ppostt.numLikes =0 ;
+                numComments: post.numComments
 
-            if (post.numDisLikes ) ppostt.numDisLikes =  post.numDisLikes ; 
-            else  ppostt.numDisLikes =0 ;
-            if (post.numComments ) ppostt.numComments =  post.numComments ; 
-            else  ppostt.numComments =0 ;
-
-
-
-            let index = getSlicingIndex(post.position.longitude, post.position.latitude);
-            //
-            //    console.log(index);
-            let slice = await db.disasterDB.get_slice(index.x, index.y);
-
-            //console.log(slice.disaster);
-
+            });
 
             if (post.type == 1) {
-                databaseTime += await slice.getOrcreateDisaster(ppostt);
+                disasterController.disasterAnalysis(disasterInfo, metaData);
             }
             else {
-                await slice.editDisaster(ppostt);
+                // edit disaster 
             }
-
-
-
         }
 
     }
@@ -118,8 +109,9 @@ async function start() {
 export async function startAnalyser() {
 
     await initDb();
+    const disasterController = new DisasterController(db);
     startTime = Date.now();
-    start();
+    start(disasterController);
     console.log("start analyser");
     DELAY = 1000;
 

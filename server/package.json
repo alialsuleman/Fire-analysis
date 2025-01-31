@@ -14,8 +14,6 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.10.4",
     "@grpc/proto-loader": "^0.7.12",
-    "base64url": "^3.0.1",
-    "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

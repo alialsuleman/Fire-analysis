@@ -2,16 +2,12 @@ import path from 'path'
 
 
 
-import { Disaster } from '../../shared';
-import { DisasterModel, PostModel } from './schema';
 import mongoose, { Connection } from 'mongoose';
 import { MONGO_URL, MONGO_PAS, MONGO_USR } from './config'
-import { MongodbPost, Post } from '../../shared/post';
-import { DisasterDao, PostDao } from '../dao';
 import { DataStore } from '../dataStore';
-import { DisasterDb } from './db/disasterDb';
-import { postDb } from './db/postDb';
 import { DisasterCache } from '../cashing/DisasterCache';
+import { DisasterDao, PostDao } from '../dao';
+import { postDb } from './db/postDb';
 
 
 let disaster = () => {
@@ -25,7 +21,7 @@ let disaster = () => {
 export class NoSqlDataStore implements DataStore {
 
 
-    disasterDB: DisasterCache = new DisasterCache();
+    disasterDB: DisasterDao = new DisasterCache();
     postDB: PostDao = new postDb();
 
 
@@ -46,10 +42,5 @@ export class NoSqlDataStore implements DataStore {
         this.postDB = new postDb();
         return this;
     }
-
-
-
-
-
 }
 
