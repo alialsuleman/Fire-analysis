@@ -23,45 +23,56 @@ Make sure you have the following installed on your system:
 ### Installation Steps  
 1. **Clone the repository**  
    ```bash
-   git clone https://github.com/your-username/fire-detection-system.git
-   cd fire-detection-system
+   git clone https://github.com/alialsuleman/Fire-analysis.git
+   cd Fire-analysis
    ```
 
 2. **Install dependencies**  
+   server : 
    ```bash
+   cd server
+   npm install
+   ```
+   dashboard : 
+   ```bash
+   cd dashboard
    npm install
    ```
 
-3. **Set up environment variables**  
+4. **Set up environment variables**  
    Create a `.env` file in the project root and add the necessary configurations:  
    ```env
-   MONGO_URI=mongodb://localhost:27017/fire-detection
-   GRPC_PORT=50051
-   HTTP_PORT=3000
+   NODE_ENV=
+   MONGO_URL = 
+   MONGO_USR =
+   MONGO_PAS =
+   PORT =
+   ID_QUEUE_SIZE = 
+   ANALYSER_DELAY = 
+   MIN_REQUIRE_COMMEN_AREA= 
+   FIRE_ACTIVATION_RATE = 
    ```
 
-4. **Start the application**  
+5. **Start the application**  
 
    - **Start the backend server**  
      ```bash
+     cd server
      npm start
      ```
 
-   - **(Optional) Run the dashboard frontend**  
-     If the dashboard is in a separate repository, navigate to its directory and start it:  
+   - **(Optional) Run the testing server **  
+     you can run typescript script , it generate events and send it by grpc stream to the server .  
      ```bash
-     cd ../fire-detection-dashboard
-     npm install
+     cd server
+     ts-node tsClient.ts
+     ```
+   - **(Optional) Run the dashboard frontend**  
+     ```bash
+     cd ../dashboard
      npm start
      ```
 
-### Running with Docker (Optional)  
-You can run the entire system using **Docker** if you prefer containerized deployment:  
-```bash
-docker-compose up --build
-```
-
-This will start both the backend and database services.
 
 ## Technologies Used
 - **Node.js** (Backend processing)
