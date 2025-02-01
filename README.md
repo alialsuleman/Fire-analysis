@@ -61,7 +61,7 @@ Make sure you have the following installed on your system:
      npm start
      ```
 
-   - **(Optional) Run the testing server **  
+   - **(Optional) Run the testing server**  
      you can run typescript script , it generate events and send it by grpc stream to the server .  
      ```bash
      cd server
