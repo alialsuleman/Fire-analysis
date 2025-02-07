@@ -3,7 +3,7 @@ import { db, initDb } from "./dataStore";
 import { ANALYSER_DELAY, DEGREE_IN_KM, latitudeShift, longitudeShift, MX_DISASTER_ID } from "./env";
 import { Post } from "./shared";
 import { disasterQueue, sharedPostsQueue } from "./datastructure/Queues";
-import { DisasterMetaDataDoc } from "./dataStore/mongodb/schema";
+import { DisasterMetaDataDoc, PostModel } from "./dataStore/mongodb/schema";
 import { DisasterController } from "./controllers/disasterController";
 import { DisasterInfoDoc, DisasterInfoModel, DisasterMetaDataModel } from "./dataStore/mongodb/schema/Disaster";
 
@@ -13,8 +13,8 @@ import { DisasterInfoDoc, DisasterInfoModel, DisasterMetaDataModel } from "./dat
 
 // slice with size 1 km ^2
 export function getSlicingIndex(latitude: number, longitude: number) {
-    let latitudeIndex = Math.floor((latitude * DEGREE_IN_KM + latitudeShift));
-    let longitudeIndex = Math.floor((longitude * DEGREE_IN_KM + longitudeShift));
+    let latitudeIndex = Math.floor((latitude + latitudeShift) * DEGREE_IN_KM / 100);
+    let longitudeIndex = Math.floor((longitude + longitudeShift) * DEGREE_IN_KM / 100);
     return {
         longitude: longitudeIndex,
         latitude: latitudeIndex
@@ -36,56 +36,62 @@ let sumTime: number = 0;
 let DELAY = 5000;
 
 
+let disasterController: DisasterController = new DisasterController(db);
 
 
-
-async function start(disasterController: DisasterController) {
+async function start() {
 
     ///// some db 
 
     let databaseTime = 0;
 
     if (sharedPostsQueue.getSize()) {
-        DELAY = 300;
-        let post = sharedPostsQueue.front();
-        if (post) {
+        DELAY = 1000;
+        let GRPC_post = sharedPostsQueue.front();
+        if (GRPC_post) {
 
 
+            const post = new PostModel({
+                ...GRPC_post,
+                createdAt: new Date()
+            });
+            await post.save();
+            console.log(JSON.stringify(post));
 
-            let index = getSlicingIndex(post.position.latitude, post.position.longitude);
+            let index = getSlicingIndex(GRPC_post.position.latitude, GRPC_post.position.longitude);
 
 
 
             let metaData = new DisasterMetaDataModel({
                 _id: "any",
                 isActive: false,
-                latitude: post.position.latitude,
-                longitude: post.position.longitude,
+                latitude: GRPC_post.position.latitude,
+                longitude: GRPC_post.position.longitude,
                 latitudeIndex: index.latitude,
                 longitudeIndex: index.longitude,
-                radius: post.radius,
+                radius: GRPC_post.radius,
                 numOfPost: 1,
             });
 
             let disasterInfo: DisasterInfoDoc = new DisasterInfoModel({
 
-                position: post.position,
+                position: GRPC_post.position,
 
                 startAt: Date.now(),
                 endAt: Date.now() + 1000 * 60 * 60,
-                severity: post.severity,
-                confidence: post.confidence,
+                severity: GRPC_post.severity,
+                confidence: GRPC_post.confidence,
 
-                numOFlatitude: post.position.latitude,
-                numOFlongitude: post.position.longitude,
-                severity_array: [post.severity],
-                numLikes: post.numLikes,
-                numDisLikes: post.numDisLikes,
-                numComments: post.numComments
+                numOFlatitude: GRPC_post.position.latitude,
+                numOFlongitude: GRPC_post.position.longitude,
+                severity_array: [GRPC_post.severity],
+                numLikes: GRPC_post.numLikes,
+                numDisLikes: GRPC_post.numDisLikes,
+                numComments: GRPC_post.numComments
 
             });
 
-            if (post.type == 1) {
+            if (GRPC_post.type == 1) {
                 disasterController.disasterAnalysis(disasterInfo, metaData);
             }
             else {
@@ -109,9 +115,9 @@ async function start(disasterController: DisasterController) {
 export async function startAnalyser() {
 
     await initDb();
-    const disasterController = new DisasterController(db);
+    disasterController = new DisasterController(db);
     startTime = Date.now();
-    start(disasterController);
+    start();
     console.log("start analyser");
     DELAY = 1000;
 

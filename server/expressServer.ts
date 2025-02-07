@@ -25,7 +25,8 @@ export function startServer() {
 
     app.get('/alldisaster', async (req, res) => {
         //   console.log("get Disasters ");
-        let disaster = await db.disasterDB.getAllDisaster();
+        let disaster = await db.disasterDB.getAll();
+        // console.log(disaster.length);
         res.send(disaster)
         //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
     })
@@ -39,53 +40,52 @@ export function startServer() {
     app.get('/AllEdge', async (req, res) => {
 
         let edge = await getAll();
-
-
-
         res.send(edge)
         //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
     })
 
-    app.get('/getDataForNode/:node', async (req: Request<{ node: string }, {}, {}, {}>, res) => {
 
 
-        let data = await db.postDB.getPostDisaster(req.params.node);
-        res.send(data);
-        //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
-    })
-
-    app.get('/index', async (req, res) => {
+    // app.get('/getDataForNode/:node', async (req: Request<{ node: string }, {}, {}, {}>, res) => {
 
 
-        res.send(db.disasterDB.map__segIndex_to_sliceIndex);
-        //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
-    })
+    //     let data = await db.postDB.getPostDisaster(req.params.node);
+    //     res.send(data);
+    //     //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
+    // })
+
+    // app.get('/index', async (req, res) => {
+
+
+    //     res.send(db.disasterDB.map__segIndex_to_sliceIndex);
+    //     //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
+    // })
 
 
 
-    app.post('/getdisasterinrange', async (req: Request<{}, {}, { longitude0: number, latitude0: number, longitude1: number, latitude1: number, numOfSkip: number }, {}>, res: Response) => {
+    // app.post('/getdisasterinrange', async (req: Request<{}, {}, { longitude0: number, latitude0: number, longitude1: number, latitude1: number, numOfSkip: number }, {}>, res: Response) => {
 
-        let x0 = req.body.longitude0;
-        let x1 = req.body.longitude1;
-        let y0 = req.body.latitude0;
-        let y1 = req.body.latitude1;
-        let numOfSkip = req.body.numOfSkip;
-        let ind1 = getSlicingIndex(x0, y0);
-        let ind2 = getSlicingIndex(x1, y1);
-        console.log(ind1);
-        console.log(ind2);
-        let level = 1;
-        if (x1 - x0 > 100) level = 2;
-        if (x1 - x0 > 1000) level = 3;
-        if (x1 - x0 > 10000) level = 4;
-        console.log("level: " + level);
-        const disasters = await db.disasterDB.getAllDisasterInRange(ind1.x, ind1.y, ind2.x, ind2.y, level, numOfSkip)
+    //     let x0 = req.body.longitude0;
+    //     let x1 = req.body.longitude1;
+    //     let y0 = req.body.latitude0;
+    //     let y1 = req.body.latitude1;
+    //     let numOfSkip = req.body.numOfSkip;
+    //     let ind1 = getSlicingIndex(x0, y0);
+    //     let ind2 = getSlicingIndex(x1, y1);
+    //     console.log(ind1);
+    //     console.log(ind2);
+    //     let level = 1;
+    //     if (x1 - x0 > 100) level = 2;
+    //     if (x1 - x0 > 1000) level = 3;
+    //     if (x1 - x0 > 10000) level = 4;
+    //     console.log("level: " + level);
+    //     const disasters = await db.disasterDB.getAllDisasterInRange(ind1.x, ind1.y, ind2.x, ind2.y, level, numOfSkip)
 
 
-        res.send({
-            disasters
-        });  // need fix 
-    })
+    //     res.send({
+    //         disasters
+    //     });  // need fix 
+    // })
 
 
 

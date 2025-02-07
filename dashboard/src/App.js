@@ -16,27 +16,18 @@ import numeral from "numeral";
 import Map from "./components/Map/Map";
 import "leaflet/dist/leaflet.css";
 
-let DEGREE = 110000;
+let DEGREE = 111000;
 let DEGREE_IN_KM = DEGREE / 1000;
 export let latitudeShift = 90 * DEGREE_IN_KM + 10;
 export let longitudeShift = 180 * DEGREE_IN_KM + 10;
 
 
-export function getSlicingPostion(x, y) {
-
-  //*100 - longitudeShift + x/DEGREE_IN_KM ;
-  x *= 100;
-  x -= longitudeShift;
-  x *= 100;
-  x /= DEGREE_IN_KM;
-
-  y *= 100;
-  y -= latitudeShift;
-  y *= 100;
-  y /= DEGREE_IN_KM;
-
+export function getSlicingIndex(latitude, longitude) {
+  let latitudeIndex = Math.floor((latitude * DEGREE_IN_KM + latitudeShift));
+  let longitudeIndex = Math.floor((longitude * DEGREE_IN_KM + longitudeShift));
   return {
-    x, y
+    longitude: longitudeIndex,
+    latitude: latitudeIndex
   }
 }
 
@@ -110,20 +101,20 @@ const App = () => {
 
 
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      //   console.log("h i " + disaster_table_id);
-      fetch(`http://localhost:4000/getDataForNode/${disaster_table_id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setSelectedNodeData(data);
-        })
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     //   console.log("h i " + disaster_table_id);
+  //     fetch(`http://localhost:4000/getDataForNode/${disaster_table_id}`)
+  //       .then((response) => response.json())
+  //       .then((data) => {
+  //         setSelectedNodeData(data);
+  //       })
 
 
-    }, 800);
+  //   }, 800);
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 
 
 
@@ -188,7 +179,6 @@ const App = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       let xx = 0;
-
       fetch("http://localhost:4000/allpost")
         .then((response) => response.json())
         .then((data) => {
@@ -214,46 +204,30 @@ const App = () => {
               .then((data) => {
                 const newNodes2 = data.map((x) => {
                   const newNode = generateRandomDisaster();
-                  newNode.countryInfo.lat = x.position.latitude + xx;
-                  newNode.countryInfo.long = x.position.longitude + xx;
+                  newNode.countryInfo.lat = x.latitude;
+                  newNode.countryInfo.long = x.longitude;
                   newNode.radius = x.radius;
                   newNode._id = x._id;
 
                   // xx += 0.0001;
                   newNode.cases = 0;
                   console.log(x.isActive)
-                  if (x.isActive == false) newNode.cases = 2;
+                  if (x.isActive == false) newNode.cases = 0;
                   return newNode;
                 });
                 //   console.log("dis");
                 //  console.log(newNodes);
-                initialData = newNodes;
+                //  initialData = newNodes;
                 numberOfDisaster = newNodes2.length;
+                console.log(numberOfDisaster);
                 setNodes([...newNodes, ...newNodes2]);
               });
           }
           cnt++;
 
         });
-      fetch("http://localhost:4000/alledge")
-        .then((response) => response.json())
-        .then((data) => {
 
-          let arr = [];
-          for (let xx of data) {
-            arr.push(
-              {
-                from: { lat: xx.latitude1, long: xx.longitude1 },
-                to: { lat: xx.latitude2, long: xx.longitude2 },
-              }
-            )
-          }
-          console.log("edg");
-          console.log(arr);
-          setEdges((prevEdges) => [...arr]);
-        });
-
-    }, 800);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);

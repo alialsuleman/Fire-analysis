@@ -5,12 +5,19 @@ import { DisasterInfoDoc, DisasterMetaDataDoc } from '../mongodb/schema/Disaster
 
 export interface DisasterDao {
 
+
     addDisasterInfo(disasterInfo: DisasterInfoDoc): Promise<string>;
     addDisasterMetaData(disasterMetaData: DisasterMetaDataDoc): Promise<void>;
 
 
+
+
     getSlice(latitude: number, longitude: number): Promise<DisasterMetaDataDoc[]>;
+    getAll(): Promise<DisasterMetaDataDoc[]>;
     getDisasterInfo(_id: string): Promise<DisasterInfoDoc | null>;
+
+
+
 
     updateDisasterInfo(newDisasterInfo: Partial<DisasterInfoDoc>): Promise<void>;
     updateDisasterMetaData(newDisasterMeta: Partial<DisasterMetaDataDoc>): Promise<void>;

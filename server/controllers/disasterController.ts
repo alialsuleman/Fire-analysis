@@ -15,22 +15,23 @@ export class DisasterController {
 
     async disasterAnalysis(disasterInfo: DisasterInfoDoc, disasterMetaData: DisasterMetaDataDoc): Promise<void> {
 
-
+        let first = false;
         while (true) {
-            let disastersMetaData: DisasterMetaDataDoc[] = await this.getDataInRange(disasterMetaData.longitude, disasterMetaData.latitude);
 
+            let disastersMetaData: DisasterMetaDataDoc[] = await this.getDataInRange(disasterMetaData.longitudeIndex, disasterMetaData.latitudeIndex);
 
+            console.log("numOfD ", disastersMetaData.length);
             let disastersInfo: DisasterInfoDoc[] = [];
             let sharedDisaster: DisasterMetaDataDoc[] = [];
 
 
             let newLongitude = disasterMetaData.longitude;
             let newLatitude = disasterMetaData.latitude;
-            let newRaduis = disasterMetaData.radius;
+
             let numberOfPost = 1;
 
             for (let x of disastersMetaData) {
-                let distance = this.distanceBetweenTwoDisaster(disasterMetaData, x);
+                let distance = distanceBetweenTwoDisaster(disasterMetaData, x);
                 let mx_dis = x.radius + disasterMetaData.radius;
                 if (distance <= mx_dis) {
 
@@ -46,11 +47,15 @@ export class DisasterController {
                     newLongitude += x.longitude;
                     newLatitude += x.latitude;
 
+                    x.longitude /= x.numOfPost;
+                    x.latitude /= x.numOfPost;
+
                     sharedDisaster.push(x);
                 }
             }
-            if (sharedDisaster.length == 0) break;
-
+            if (sharedDisaster.length == 0) {
+                break;
+            }
 
 
             newLongitude /= numberOfPost;
@@ -61,22 +66,34 @@ export class DisasterController {
             disasterMetaData.longitude = newLongitude;
             disasterMetaData.latitude = newLatitude;
             disasterMetaData.numOfPost = numberOfPost;
-
+            console.log(JSON.stringify(disasterMetaData));
             for (let x of sharedDisaster) {
-                let distance = this.distanceBetweenTwoDisaster(disasterMetaData, x);
+                let distance = distanceBetweenTwoDisaster(disasterMetaData, x);
                 distance += x.radius;
+                console.log(
+                    JSON.stringify(x), " : ", distance
+                )
                 disasterMetaData.radius = Math.max(distance, disasterMetaData.radius);
             }
             // end update 
 
 
             //delete disaster ;
+            console.log("numOfDelete ", sharedDisaster.length);
             for (let x of sharedDisaster) {
+                console.log("delete ", x._id);
                 this.deleteDisaster(x._id);
             }
             //end delete disaster ;
-            this.createNewDisaster(disasterInfo, disasterMetaData);
+
+
+
+
+
         }
+
+        await this.createNewDisaster(disasterInfo, disasterMetaData);
+
 
 
     }
@@ -105,19 +122,24 @@ export class DisasterController {
         return arr;
     }
 
-    distanceBetweenTwoDisaster(disasterMetaData_1: DisasterMetaDataDoc, disasterMetaData_2: DisasterMetaDataDoc): number {
 
-        const ans =
-            (disasterMetaData_1.longitude - disasterMetaData_2.longitude) *
-            (disasterMetaData_1.longitude - disasterMetaData_2.longitude)
-            -
-            (disasterMetaData_1.latitude - disasterMetaData_2.latitude) *
-            (disasterMetaData_1.latitude - disasterMetaData_2.latitude)
-
-            ;
-
-        return DEGREE * ans;
-    }
 
 
 }
+
+
+
+
+function distanceBetweenTwoDisaster(disasterMetaData_1: DisasterMetaDataDoc, disasterMetaData_2: DisasterMetaDataDoc): number {
+    const lat1 = disasterMetaData_1.latitude, lon1 = disasterMetaData_1.longitude;
+    const lat2 = disasterMetaData_2.latitude, lon2 = disasterMetaData_2.longitude;
+
+    var p = 0.017453292519943295;    // Math.PI / 180
+    var c = Math.cos;
+    var a = 0.5 - c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) *
+        (1 - c((lon2 - lon1) * p)) / 2;
+
+    return 12742 * Math.asin(Math.sqrt(a)) * 1000; // 2 * R; R = 6371 km
+}
+

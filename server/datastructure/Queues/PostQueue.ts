@@ -1,11 +1,11 @@
-import { Post } from "../../proto/ndmsRpcEvent/Post";
+import { Post as GRPCPOST } from "../../proto/ndmsRpcEvent/Post";
 
 
 
 
 class PostsQueue {
     private static instance: PostsQueue;
-    private queue: Post[];
+    private queue: GRPCPOST[];
 
     private constructor() {
         this.queue = [];
@@ -19,11 +19,11 @@ class PostsQueue {
         return PostsQueue.instance;
     }
 
-    add(value: Post) {
+    add(value: GRPCPOST) {
         this.queue.push(value);
     }
 
-    front(): Post | undefined {
+    front(): GRPCPOST | undefined {
         return this.queue.shift();
     }
 
@@ -31,7 +31,7 @@ class PostsQueue {
         return this.queue.length;
     }
 
-    display(): Post[] {
+    display(): GRPCPOST[] {
         return this.queue;
     }
 }

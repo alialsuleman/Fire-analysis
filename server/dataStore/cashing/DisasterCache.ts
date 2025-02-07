@@ -13,42 +13,44 @@ export class DisasterCache extends DisasterDb {
 
 
 
-    slice: DisasterMetaDataDoc[][] = [[]];
-
+    memo: any[] = [];
     idPool: IdPool;
-    map_sliceIndex_to_segIndex: any = {}; // here we trans lat , long to id_number 
+    map_sliceIndex_to_segIndex: any[] = []; // here we trans lat , long to id_number 
     segmentTree: SegmentTree;
 
 
     constructor() {
         super();
-        this.initWorldSlicingArray();
         this.idPool = new IdPool(40001);
         this.segmentTree = new SegmentTree(400001);
     }
 
-    initWorldSlicingArray() {
-        console.log("init world array");
-        for (let i = 0; i <= 40000; i++) {
-            this.slice[i] = [];
-        }
+    getIndex(latitude: number, longitude: number): number {
+        return latitude * 100000 + longitude;
     }
 
 
     async addDisasterMetaData(disasterMetaData: DisasterMetaDataDoc): Promise<void> {
         super.addDisasterMetaData(disasterMetaData);
-        // let lat_index = disasterMetaData.latitudeIndex;
-        // let lon_index = disasterMetaData.longitudeIndex;
-
-        // let index = JSON.stringify({ lat_index, lon_index });
-        // if (typeof this.map_sliceIndex_to_segIndex[index] == 'number') {
-        //     let slice_index = this.map_sliceIndex_to_segIndex[index];
-        //     this.slice[slice_index].push(disasterMetaData);
-        // }
+        let index = this.getIndex(disasterMetaData.latitudeIndex, disasterMetaData.longitudeIndex);
+        if (this.memo[index] != undefined) {
+            this.memo[index].push(disasterMetaData);
+        }
     }
 
     async getSlice(latitude: number, longitude: number): Promise<DisasterMetaDataDoc[]> {
-        return await super.getSlice(latitude, longitude);
+        let index = this.getIndex(latitude, longitude);
+        //if (this.memo[index] != undefined) return this.memo[index];
+        this.memo[index] = await super.getSlice(latitude, longitude);
+        return this.memo[index];
+    }
+
+    async updateDisasterMetaData(newDisasterMeta: DisasterMetaDataDoc): Promise<void> {
+        super.updateDisasterMetaData(newDisasterMeta);
+    }
+
+    async deleteDisasterMetaDataById(id: string): Promise<void> {
+        super.deleteDisasterMetaDataById(id);
     }
 
 

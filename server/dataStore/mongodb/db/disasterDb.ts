@@ -11,6 +11,12 @@ export class DisasterDb implements DisasterDao {
 
 
 
+    async getAll(): Promise<DisasterMetaDataDoc[]> {
+        return await DisasterMetaDataModel.find();
+    }
+
+
+
     /*                      !--[READ  SECTION]--!                              */
     async getDisasterInfo(_id: string): Promise<DisasterInfoDoc | null> {
         return await DisasterInfoModel.findById(_id);

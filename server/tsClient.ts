@@ -5,7 +5,6 @@ import { ProtoGrpcType } from './proto/event'
 import { Disaster } from './proto/ndmsRpcEvent/Disaster'
 import { Timestamp } from './proto/google/protobuf/Timestamp';
 import { Post } from './proto/ndmsRpcEvent/Post'
-import { distanceBetweenTwoPoint } from './datastructure'
 
 const PORT = 8082
 const PROTO_FILE = './proto/event.proto'
