@@ -35,10 +35,10 @@ export class DisasterController {
                 let mx_dis = x.radius + disasterMetaData.radius;
                 if (distance <= mx_dis) {
 
-                    // let d = await this.db.disasterDB.getDisasterInfo(x._id);
-                    // if (d) {
-                    //     disastersInfo.push(d);
-                    // }
+                    let d = await this.db.disasterDB.getDisasterInfo(x._id);
+                    if (d) {
+                        disastersInfo.push(d);
+                    }
                     x.longitude *= x.numOfPost;
                     x.latitude *= x.numOfPost;
 
@@ -55,6 +55,19 @@ export class DisasterController {
             }
             if (sharedDisaster.length == 0) {
                 break;
+            }
+            for (let x of disastersInfo) {
+                disasterInfo.startAt = Math.min(disasterInfo.startAt, x.startAt);
+                disasterInfo.endAt = Math.max(disasterInfo.endAt, x.endAt);
+                disasterInfo.numComments += x.numComments;
+                disasterInfo.numDisLikes += x.numDisLikes;
+                disasterInfo.numLikes += x.numLikes;
+
+                disasterInfo.numOFlatitude += x.numOFlatitude;
+                disasterInfo.numOFlongitude += x.numOFlongitude;
+
+                disasterInfo.severity += x.severity;
+                disasterInfo.confidence += x.confidence;
             }
 
 
@@ -82,7 +95,7 @@ export class DisasterController {
             console.log("numOfDelete ", sharedDisaster.length);
             for (let x of sharedDisaster) {
                 console.log("delete ", x._id);
-                this.deleteDisaster(x._id);
+                this.deleteDisaster(x._id, x.longitude, x.latitude);
             }
             //end delete disaster ;
 
@@ -91,7 +104,8 @@ export class DisasterController {
 
 
         }
-
+        disasterInfo.severity /= disasterMetaData.numOfPost;
+        disasterInfo.confidence /= disasterMetaData.numOfPost;
         await this.createNewDisaster(disasterInfo, disasterMetaData);
 
 
@@ -105,9 +119,9 @@ export class DisasterController {
         await this.db.disasterDB.addDisasterMetaData(disasterMetaData);
     }
 
-    async deleteDisaster(id: string): Promise<void> {
-        await this.db.disasterDB.deleteDisasterInfoById(id);
-        await this.db.disasterDB.deleteDisasterMetaDataById(id);
+    async deleteDisaster(id: string, longitude: number, latitude: number): Promise<void> {
+        this.db.disasterDB.deleteDisasterInfoById(id);
+        await this.db.disasterDB.deleteDisasterMetaDataById(id, longitude, latitude);
     }
 
 

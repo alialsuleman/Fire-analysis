@@ -24,35 +24,30 @@ export function startServer() {
     app.use(express.json());
 
     app.get('/alldisaster', async (req, res) => {
-        //   console.log("get Disasters ");
         let disaster = await db.disasterDB.getAll();
-        // console.log(disaster.length);
         res.send(disaster)
-        //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
     })
 
     app.get('/allpost', async (req, res) => {
         let posts = await db.postDB.getAll();
-        //   console.log("posts");
         res.send(posts)
-        //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
     })
     app.get('/AllEdge', async (req, res) => {
 
         let edge = await getAll();
         res.send(edge)
-        //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
     })
 
 
 
-    // app.get('/getDataForNode/:node', async (req: Request<{ node: string }, {}, {}, {}>, res) => {
+    app.get('/getDataForNode/:node', async (req: Request<{ node: string }, {}, {}, {}>, res) => {
 
-
-    //     let data = await db.postDB.getPostDisaster(req.params.node);
-    //     res.send(data);
-    //     //res.send( 'from express server '+ JSON.stringify(worldSliceing[0][110])) ;
-    // })
+        const node = req.params.node;
+        console.log(node);
+        let data = await db.disasterDB.getDisasterInfo(node);
+        console.log(data);
+        res.send([data]);
+    })
 
     // app.get('/index', async (req, res) => {
 
@@ -94,11 +89,6 @@ export function startServer() {
 
         res.send({ message: 'Welcome to api!' });
     });
-
-
-
-
-
     app.all('*', (req, res, next) => {
         return res.status(404).json({
             status: ERROR,
@@ -106,7 +96,6 @@ export function startServer() {
             message: "this resource not available"
         });
     })
-
 
     //global middleware for error handler 
     app.use((error: AppError, req: Request, res: Response, next: NextFunction) => {
@@ -118,30 +107,7 @@ export function startServer() {
             code: error.statusCode || 500
         });
     })
-
-
-
-    const server = app.listen(PORT, () => console.log(`server Running in port 3000 🐱‍🐉`))
+    const server = app.listen(PORT, () => console.log(`server Running in port ${PORT} 🐱‍🐉`))
     server.on('error', console.error);
     return app;
 }
-
-
-
-
-/*
-
-33.49835344536643, 36.301467238746284
-33.498384391798666, 36.30142338098637  // 5.61 
-
-
-
-33.4983759518637, 36.30146498963039     //  8.83
-
-
-
-33.4984250869997, 36.301164802487115
-33.49850672639141, 36.30107964235953  // 12 metre
-
-
-*/

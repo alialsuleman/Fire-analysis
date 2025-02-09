@@ -24,7 +24,7 @@ export interface DisasterDao {
 
 
     deleteDisasterInfoById(id: string): Promise<void>;
-    deleteDisasterMetaDataById(id: string): Promise<void>;
+    deleteDisasterMetaDataById(id: string, longitude: number, latitude: number): Promise<void>;
 }
 
 

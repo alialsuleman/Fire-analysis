@@ -2,6 +2,8 @@
 import React from "react";
 import "./Table.css";
 const Table = ({ data }) => {
+
+
   return (
     <div className="table">
       <table>
@@ -20,15 +22,15 @@ const Table = ({ data }) => {
           </tr>
         </thead>
         <tbody>
-          {data.map((position, index) => (
+          {data.lenght != 0 && data.map((position, index) => (
             <tr key={index}>
 
-              <td>{position.position.longitude}</td>
-              <td>{position.position.latitude}</td>
+              <td>{position.longitude}</td>
+              <td>{position.latitude}</td>
               <td>{position.radius}</td>
               <td>{position.severity}</td>
               <td>{position.confidence}</td>
-              <td>{position.createdAt}</td>
+              <td>{(new Date(position.startAt)).toString()}</td>
               <td>{position.numLikes}</td>
               <td>{position.numDisLikes}</td>
               <td>{position.numComments}</td>

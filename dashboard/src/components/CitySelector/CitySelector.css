@@ -1,0 +1,136 @@
+/* حاوية القائمة */
+.city-selector-container {
+    height: 360px;
+    font-size: 14px;
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* تسمية القائمة */
+.city-label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+    color: #333;
+}
+
+/* القائمة المنسدلة */
+.city-dropdown {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.city-dropdown:hover {
+    border-color: #007bff;
+}
+
+.city-dropdown:focus {
+    outline: none;
+    border-color: #0056b3;
+    box-shadow: 0px 0px 5px rgba(0, 91, 187, 0.5);
+}
+
+/* تنسيق الجدول */
+.city-table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.city-table th,
+.city-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+
+
+.city-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* لون خاص للحالة */
+.status {
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.active {
+    color: green;
+}
+
+.not.active {
+    color: red;
+}
+
+/* تأثير عند تمرير الفأرة */
+.city-table tbody tr:hover {
+    background-color: #ddd;
+    transition: 0.3s;
+}
+
+/* تحديد الحاوية التي تحتوي على الجدول */
+.city-table-container {
+    max-height: 270px;
+    /* تحديد ارتفاع ثابت */
+    overflow-y: auto;
+    /* إظهار شريط التمرير عند الحاجة */
+    margin-top: 15px;
+    border: 1px solid #ccc;
+    /* إطار حول الجدول */
+    border-radius: 5px;
+    /* جعل الحواف دائرية */
+}
+
+/* تنسيق الجدول */
+.city-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.city-table th,
+.city-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+
+/* تحديد ارتفاع الصفوف داخل الجدول */
+.city-table tbody tr {
+    height: 40px;
+}
+
+/* لون مختلف لكل صف زوجي */
+.city-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* تأثير عند تمرير الفأرة */
+.city-table tbody tr:hover {
+    background-color: #ddd;
+    transition: 0.3s;
+}
+
+.city-table thead {
+    position: sticky;
+    top: 0;
+    background-color: #557aa8;
+    color: white;
+    z-index: 1;
+    /* لتفادي أن يختفي تحت المحتوى */
+}

@@ -62,7 +62,7 @@ export class DisasterDb implements DisasterDao {
     async deleteDisasterInfoById(id: string): Promise<void> {
         await DisasterInfoModel.findByIdAndDelete(id);
     }
-    async deleteDisasterMetaDataById(id: string): Promise<void> {
+    async deleteDisasterMetaDataById(id: string, longitude: number, latitude: number): Promise<void> {
         await DisasterMetaDataModel.findByIdAndDelete(id);
     }
 

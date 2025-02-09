@@ -2,7 +2,7 @@
 import { IdPool } from "../../datastructure/Queues/IdPool";
 import { SegmentTree } from "../../datastructure/segmentTree/segmentTree";
 import { DisasterDb } from "../mongodb/db/disasterDb";
-import { DisasterMetaDataDoc } from "../mongodb/schema";
+import { DisasterMetaDataDoc, DisasterMetaDataModel } from "../mongodb/schema";
 
 
 interface Slice_index {
@@ -31,7 +31,7 @@ export class DisasterCache extends DisasterDb {
 
 
     async addDisasterMetaData(disasterMetaData: DisasterMetaDataDoc): Promise<void> {
-        super.addDisasterMetaData(disasterMetaData);
+        await super.addDisasterMetaData(disasterMetaData);
         let index = this.getIndex(disasterMetaData.latitudeIndex, disasterMetaData.longitudeIndex);
         if (this.memo[index] != undefined) {
             this.memo[index].push(disasterMetaData);
@@ -40,17 +40,27 @@ export class DisasterCache extends DisasterDb {
 
     async getSlice(latitude: number, longitude: number): Promise<DisasterMetaDataDoc[]> {
         let index = this.getIndex(latitude, longitude);
-        //if (this.memo[index] != undefined) return this.memo[index];
+        // if (this.memo[index] != undefined) return this.memo[index];
         this.memo[index] = await super.getSlice(latitude, longitude);
         return this.memo[index];
     }
 
     async updateDisasterMetaData(newDisasterMeta: DisasterMetaDataDoc): Promise<void> {
-        super.updateDisasterMetaData(newDisasterMeta);
+        // let index = this.getIndex(newDisasterMeta.latitude, newDisasterMeta.longitude);
+        // if (this.memo[index] != undefined)
+        //     for (let i = 0; i < this.memo[index].length; i++) {
+        //         if (this.memo[index][i]._id == newDisasterMeta._id) {
+        //             this.memo[index][i] = newDisasterMeta;
+        //             break;
+        //         }
+        //     }
+        await super.updateDisasterMetaData(newDisasterMeta);
     }
 
-    async deleteDisasterMetaDataById(id: string): Promise<void> {
-        super.deleteDisasterMetaDataById(id);
+    async deleteDisasterMetaDataById(id: string, longitude: number, latitude: number): Promise<void> {
+        //   let index = this.getIndex(latitude, longitude);
+        //    this.memo[index] = undefined;
+        await super.deleteDisasterMetaDataById(id, longitude, latitude);
     }
 
 

@@ -11,56 +11,56 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-.app {
 
-  justify-content: space-evenly;
-  background-color: #F4F9F9;
-  padding: 20px;
-}
+.map_stuff {
 
-.app__dropdown {
-  background-color: white;
-}
-
-.app__header {
   display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-  justify-content: space-between;
+  width: 100%;
+  margin-right: 0;
+  padding-right: 0;
+
 }
 
-.app__header>h1 {
-  color: #161853;
-  font-size: 2rem;
+.tesst {
+  margin: 10px;
+  width: 35%;
+  height: 400;
+
+  border-radius: 12px;
 }
 
-.app__stats {
-  display: flex;
-  justify-content: space-between;
+.mp {
+
+  width: 65%;
+  margin: 10px 0px 10px 10px;
+  ;
 }
 
-.app__left {
-  flex: 0.9;
+
+/* 
+.footerrr {
+
+
+  width: 98%;
+  margin: 10px;
+  height: 190px;
+  border-radius: 12px;
 }
 
-.app__right {
-  display: flex;
-  flex-direction: column;
-}
+ */
 
-.app__information>h3 {
-  color: #6a5d5d;
-  font-weight: 400;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
+.events {
 
-.app__information>h3:last-of-type {
-  margin-top: 1.5rem;
-}
+  text-align: center;
+  padding: 10px 150px;
+  border: 3px solid rgb(99, 65, 65);
+  color: rgb(99, 65, 65);
 
-@media (max-width: 990px) {
-  .app {
-    flex-direction: column;
-  }
+  margin: 10px 300px 5px 300px;
+  border-radius: 10px;
+  text-align: center;
+  vertical-align: middle;
+
+
+
 }
